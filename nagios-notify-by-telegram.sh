@@ -57,7 +57,6 @@ fi
 #Enable "extra" logic only for specific chat
 if [[ "$contactName" == "$regularChatName" ]]
 then
-	tgSendCmd="post" #its a channels
         #extra monitoring logic
         currentDate=`date +"%Y-%m-%d %H:%M:%S"`
         serviceCounterFile=""$countersDir""$serviceName"_counter"
