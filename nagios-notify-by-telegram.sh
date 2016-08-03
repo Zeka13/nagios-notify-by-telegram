@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#This script helps integrate Nagios instances
+#with telegrams chat and have special logic inside.
+
 sendFunc()
 {
 	"$tgBinPath" `
@@ -30,6 +33,9 @@ serviceName="$3"
 extraChatName="Extra_Monitoring"
 fackupChatName="Fackup_Monitoring"
 regularChatName="Regular_Monitoring"
+
+#Do not send this message to "extra" chats
+recoveryPattern="***** RECOVERY"
 
 #Maximum MINUTES that service or host can be down
 #If this value reched,
@@ -89,16 +95,21 @@ then
 	#If new notice not older than max TimeDiff
 	if [[ "$curTimeDiffMins" -le "$extraTimeDiffMins"  ]] #<=
 	then
-		#Just force message reciver - its a fuckup!
-		if [[ "$currentCounterAmount" -ge "$critTimeDiffMins"  ]] # >=
+		#Do not send this message to "extra" chats
+		isItRevocery=`echo "$messageText" | grep "$recoveryPattern"`
+		if [[ -z "$isItRevocery" ]]
 		then
-			contactName="$fackupChatName"
-		fi
+			#Just force message reciver - its a fuckup!
+			if [[ "$currentCounterAmount" -ge "$critTimeDiffMins"  ]] # >=
+			then
+				contactName="$fackupChatName"
+			fi
 
-		#Just force message reciver - its a super fuckup!
-		if [[ "$currentCounterAmount" -ge "$extraTimeDiffMins"  ]] # >=
-		then
-			contactName="$extraChatName"
+			#Just force message reciver - its a super fuckup!
+			if [[ "$currentCounterAmount" -ge "$extraTimeDiffMins"  ]] # >=
+			then
+				contactName="$extraChatName"
+			fi
 		fi
 
 		#Increase counter with current time differense
